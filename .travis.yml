@@ -8,13 +8,15 @@ branches:
 matrix:
   include:
     - os: linux
-      env: SPEC=nightly-2017-05-25
-    - os: linux
-      env: SPEC=nightly-2017-06-01
-    - os: linux
-      env: SPEC=nightly-2017-06-08
-    - os: linux
       env: SPEC=nightly-2017-06-15
+    - os: linux
+      env: SPEC=nightly-2017-06-16
+    - os: linux
+      env: SPEC=nightly-2017-06-17
+    - os: linux
+      env: SPEC=nightly-2017-06-18
+    - os: linux
+      env: SPEC=nightly-2017-06-19
 
 install:
   - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain $SPEC -y
