@@ -8,13 +8,13 @@ branches:
 matrix:
   include:
     - os: linux
-      env: SPEC=nightly-2017-06-21
+      env: SPEC=nightly-2017-03-19
     - os: linux
-      env: SPEC=nightly-2017-06-28
+      env: SPEC=nightly-2017-04-19
     - os: linux
-      env: SPEC=nightly-2017-07-05
+      env: SPEC=nightly-2017-05-19
     - os: linux
-      env: SPEC=nightly-2017-07-12
+      env: SPEC=nightly-2017-06-19
     - os: linux
       env: SPEC=nightly-2017-07-19
 
