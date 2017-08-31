@@ -40,14 +40,6 @@ after_success:
         cargo benchcmp benches-control benches-variable;
     fi
 
-notifications:
-  webhooks:
-    urls:
-      - https://webhooks.gitter.im/e/9c035a194ac4fd4cc061
-    on_success: change
-    on_failure: always
-    on_start: false
-
 dist: trusty
 sudo: false
 
