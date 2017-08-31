@@ -1,47 +1,12 @@
+dist: trusty
+sudo: false
 language: rust
-
 cache: cargo
 
 rust:
   - nightly
   - beta
   - stable
-  - 1.2.0
-
-env:
-  matrix:
-    - FEATURES=''
-    - FEATURES='--features "regexp regexp_macros"'
-    - FEATURES='--features "stream regexp regexp_macros"'
-    - FEATURES='--features "stream regexp regexp_macros" --no-default-features'
-
-before_script:
-  - if [ "$TRAVIS_RUST_VERSION" != "1.2.0" ]; then
-      cargo install cargo-travis --force && export PATH=$HOME/.cargo/bin:$PATH;
-    fi
-
-script:
-  - '[ $TRAVIS_RUST_VERSION != 1.2.0   ] || cargo test --verbose --features "regexp"'
-  - '[ $TRAVIS_RUST_VERSION != nightly ] || cargo build --verbose --features "nightly regexp"'
-  - '[ $TRAVIS_RUST_VERSION == 1.2.0   ] || eval cargo test --verbose $FEATURES'
-  - '[ $TRAVIS_RUST_VERSION != nightly ] || cargo bench --verbose'
-  - '[ $TRAVIS_RUST_VERSION != stable  ] || cargo doc --verbose --features "std stream regexp regexp_macros" --no-default-features'
-
-after_success:
-  - '[ $TRAVIS_RUST_VERSION != nightly ] || cargo bench --verbose'
-  - '[ $TRAVIS_RUST_VERSION == 1.2.0   ] || cargo coveralls --verbose'
-  - '[ $TRAVIS_RUST_VERSION != nightly ] || cargo bench --verbose'
-  - if [ "${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}" != "master" ] && [ "$TRAVIS_RUST_VERSION" == "nightly" ]; then
-        cargo install cargo-benchcmp --force;
-        cargo bench > benches-variable;
-        git fetch;
-        git checkout master;
-        cargo bench > benches-control;
-        cargo benchcmp benches-control benches-variable;
-    fi
-
-dist: trusty
-sudo: false
 
 addons:
   apt:
@@ -53,3 +18,49 @@ addons:
       - cmake
     sources:
       - kalakris-cmake
+
+before_script: |
+  cargo install cargo-travis --force && export PATH=$HOME/.cargo/bin:$PATH
+
+script:
+  - eval cargo build --verbose $FEATURES
+  - eval cargo test --verbose $FEATURES
+  - if [ $TRAVIS_RUST_VERSION == nightly ]; then cargo bench --verbose; fi
+
+after_success: |
+  case "$TRAVIS_RUST_VERSION" in
+    nightly)
+      cargo bench --verbose
+      cargo coveralls --verbose
+      cargo bench --verbose
+      if [ "${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}" != "master" ]; then
+        cargo install cargo-benchcmp --force
+        cargo bench > benches-variable
+        git fetch
+        git checkout master
+        cargo bench > benches-control
+        cargo benchcmp benches-control benches-variable
+      fi
+      ;;
+    beta|stable)
+      cargo coveralls --verbose
+      ;;
+  esac
+
+
+env:
+  matrix:
+    - FEATURES='' # default ones
+    - FEATURES='--features "regexp"'
+    - FEATURES='--features "regexp regexp_macros"'
+    - FEATURES='--features "stream regexp regexp_macros"'
+    - FEATURES='--features "stream regexp regexp_macros" --no-default-features'
+
+matrix:
+  include:
+    - rust: nightly
+      env: FEATURES='--features "nightly regexp"'
+
+    - rust: stable
+      env: DOC_FEATURES='--features "std stream regexp regexp_macros" --no-default-features'
+      script: eval cargo doc --verbose $DOC_FEATURES
