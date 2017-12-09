@@ -23,11 +23,12 @@ matrix:
     - rust: stable
       env: DOC_FEATURES='--features "std regexp regexp_macros" --no-default-features'
       script: eval cargo doc --verbose $DOC_FEATURES
+      after_success: echo 'No need to send coveralls'
 
 notifications:
   webhooks:
     urls:
-      - https://webhooks.gitter.im/e/9c035a194ac4fd4cc061
+      - https://webhooks.gitter.im/
     on_success: change
     on_failure: always
     on_start: false
@@ -45,7 +46,8 @@ addons:
       - kalakris-cmake
 
 before_script: |
-  cargo install cargo-travis --force && export PATH=$HOME/.cargo/bin:$PATH
+  cargo install cargo-travis || echo "cargo-travis already installed"
+  export PATH=$HOME/.cargo/bin:$PATH
 
 script:
   - eval cargo build --verbose $FEATURES
@@ -58,7 +60,7 @@ after_success: |
       cargo coveralls --verbose
       cargo bench --verbose
       if [ "${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}" != "master" ]; then
-        cargo install cargo-benchcmp --force
+        cargo install cargo-benchcmp || echo "cargo-benchcmp already installed"
         cargo bench > benches-variable
         git fetch
         git checkout master
